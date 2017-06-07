@@ -1,8 +1,9 @@
+import jdk.nashorn.internal.runtime.Context;
+
 import java.net.*;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
-
 import static com.sun.webkit.network.URLs.newURL;
 
 public class node {//双链表的结点
@@ -144,8 +145,28 @@ class list{//设有尾指针的循环队列
 }
 
 class stack extends list{
-    public stack(){super();}
-    public void insert(Object o){insert(o, false);}
+    public stack(){
+        super();
+    }
+    public void insert(Object o){
+        insert(o, false);
+    }
+    public Object pop(){
+        if (tail!=null){
+            tail=tail.getNext();
+            if (tail==tail.getNext()){
+                Object str=tail.getData();
+                tail=null;
+                return str;
+            }else {
+                Object str=tail.getData();
+                tail.getPrev().setNext(tail.getNext());
+                tail.getNext().setPrev(tail.getPrev());
+                return str;
+            }
+        }
+        return null;
+    }
 }
 class queue extends list{
     public queue(){super();}
@@ -351,7 +372,41 @@ class spider implements Runnable{
         else return "Errors:\n"+errors.toString()+"\nEnd oferrors\n";
     }
     private String getCompleted(){
-        return "Completed Sites:\n"+done.toString()+"\nEnd of completedsites\n"+"imgurls:"+jpgs.toString()+"\nEnd of imgurls\n";
+        //下载文件
+        new Thread(){
+            @Override
+            public void run() {
+                String path= System.getProperty("user.dir");//获取当前project路径
+                int i=0;
+                while (!jpgs.isEmpty()){
+                    String url=jpgs.pop().toString();
+                    System.out.println(url);
+                    File file = new File(path +"/"+(i++)+".jpg");
+                    try{
+                        FileOutputStream fileOutputStream=new FileOutputStream(file);
+                        URL u = new URL(url);
+                        URLConnection urlConnection = u.openConnection();
+                        InputStream in = urlConnection.getInputStream();
+                        BufferedInputStream bufIn = new BufferedInputStream(in);
+                        int data;
+                        byte[] bytes=new byte[1024];
+                        while(true){
+                            data = bufIn.read(bytes);
+                            if (data == -1) {
+                                break;
+                            } else {
+                                fileOutputStream.write(bytes,0,data);
+                            }
+                        }
+                        fileOutputStream.close();
+                        fileOutputStream.flush();
+                    }catch(Exception e){
+                    }
+                }
+            }
+        }.run();
+        //显示已经爬取了多少网页
+        return "Completed Sites:\n"+done.toString()+"\nEnd of completedsites\n";
     }
 
     /*

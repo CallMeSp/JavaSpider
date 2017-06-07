@@ -98,7 +98,7 @@ public class spidergui extends Frame {
 
     public static void main(String []args){
         int max = 10;
-        String site="http://www.51voa.com";
+        String site="http://www.umei.cc/";
         String base="";
         int time=0;
         for(int i=0;i<args.length;i++){
@@ -133,7 +133,6 @@ public class spidergui extends Frame {
         }
 
         spider spi=new spider(site, max, base);
-
         if(time>0)spi.setTimer(time);
 
         spidergui s = new spidergui(spi, "Spider: "+site);
